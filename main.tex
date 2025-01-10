@@ -1,0 +1,556 @@
+\documentclass{article}
+\raggedright
+\usepackage{graphicx} % Required for inserting images
+\usepackage[font={small,it}]{caption}
+\usepackage[skip=10pt plus1pt, indent=25pt]{parskip}
+\usepackage[backend=biber]{biblatex}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\pagenumbering{arabic}
+\addbibresource{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/LaTeX/Bibliography.bib}\nocite{*}
+\title{Analyzing Lizard Populations With Matrix Population Models}
+\author{Mitchell Blaha}
+\date{July 2024}
+
+\begin{document}
+
+    \maketitle
+    \tableofcontents
+
+    \newpage
+    \begin{center}
+        \section{Introduction}\label{sec:introduction}
+    \end{center}
+
+    The Texas horned lizard (Phrynosoma cornutum) is the largest of about 21 species of horned lizard throughout North America.
+    It lives in the South-central United States and northern Mexico, and prefers an arid or semiarid climate~\cite{walker_phrynosoma_2018}.
+    Their habitat is loose sand or soft soil, as they depend on digging holes which they sleep in at night.
+    Although there are some stable populations of Texas horned lizard, they are dying out as a species and are considered threatened in Texas~\cite{noauthor_texas_nodate}.
+
+    The Texas horned lizard goes through three significant stages of life: hatchling, juvenile, and adult.
+    These are the same three stages found in matrix models of Texas horned lizard populations~\cite{noauthor_nodate}.
+    The goal of this research project is to use these matrix population models to compare populations of Texas horned lizard and develop insight into how best to treat these populations, with the goal of finding a balance between their wellbeing and that of the environment.
+
+    The two populations that will be compared are both from the United States, one in southern Texas and the other in central Oklahoma.
+    They are roughly 530 miles apart, and only about 1.5 degrees longitude separates them (meaning that most of the distance between them is north/south).
+    Each population likely experiences unique environmental challenges.
+    About 70\% of the diet of Texas horned lizards is made up of harvester ants.
+    Overuse of pesticides and the introduction of invasive red imported fire ants from South America are two reasons for a decline in harvester ant populations, and thus Texas horned lizard populations as well~\cite{fertschai_avoiding_2021}.
+    Other potential reasons that Texas horned lizards are not doing well are loss of habitat, human eradication of harvester ants, and predation of lizards by domestic animals (like dogs and cats).
+
+    By the end of this research, it is hoped that some recommendations can be made to accommodate the specific populations of Texas horned lizard mentioned.
+    By analyzing the long term predictions of the matrix models, it may be determined whether the population needs to be assisted or tempered.
+    Through techniques like sensitivity analysis, it may be determined how best to go about that.
+
+    \newpage
+    \begin{center}
+        \section{Mathematical Methods}\label{sec:mathematical-methods}
+    \end{center}
+
+    \subsection{Defining Matrix Population Models}\label{subsec:defining-matrix-population-models}
+
+    \hspace{\parindent}A matrix population model is a system of linear equations that defines how each stage of a given population changes with each change in time~\cite{shoemaker_lab_2024}.
+    For example, suppose that there is a population of rats that have been observed for a while.
+    It has been determined that no rat lives to three years old, and that there is an equal number of males and females in the population.
+    Furthermore, the survival rates of each age of rat have been determined.
+    Half of the ``baby'' rats (between zero and one-year-old) live to become one-year-old and three fifths of the one-year-old rats live to become two years old.
+    As stated before, no rat lives to three, so all the two-year-olds die.
+    The other important number in a matrix population model (aside from the survival rate) is the ``fecundity,'' the average number of offspring produced by each individual during a time step.
+    Fecundity is equal to some ``fertility'' value times the survival rate, because individuals that die do not reproduce.
+    The fecundity of baby rats has been determined to be 0.6 (three babies are born for every five existing baby rats), 2.4 for one-year-olds, and 0.4 for two-year-olds.
+    Using these numbers (survival rate and fecundity), a system of linear equations can be constructed to model this population (t is years):
+    \begin{equation}
+        P_0(t+1)=0.6 \cdot P_0(t)+2.4 \cdot P_1(t)+0.4 \cdot P_2(t)\label{eq:equation1}
+    \end{equation}
+    \noindent This is the sum of all new babies in the new year, given by the sum of the products of the fecundities and the populations in the previous year.
+    \begin{equation}
+        P_1(t+1)=0.5 \cdot P_0(t)\label{eq:equation2}
+    \end{equation}
+    \noindent All one-year-olds are just babies who lived one year.
+    \begin{equation}
+        P_2(t+1)=0.6 \cdot P_1(t)\label{eq:equation3}
+    \end{equation}
+    \noindent All two-year-olds are one-year-olds from the last year.
+    From this system of linear equations, a matrix can be constructed:
+    \begin{equation}
+        \begin{bmatrix}
+            0.6 & 2.4 & 0.4 \\
+            0.5 & 0   & 0   \\
+            0   & 0.6 & 0
+        \end{bmatrix}\label{eq:equation4}
+    \end{equation}
+    Each column and row represents a stage in the life of the rat.
+    The top row represents the fecundity, and the second and third row represent survival rates for their respective stages, which are represented by columns.
+    For example, the value in row two and column one, 0.5, defines the proportion of rats in stage one that advance to stage two.
+    The value in row one column three, 0.4, defines the proportion of rats in stage three that will have offspring in stage one next year.
+
+    This matrix (4) is known as the \textbf{transition matrix}.
+    In order to use it to make predictions about the future, an initial state is required.
+    The \textbf{population vector} defines this initial state.
+    The \textit{i}th component of the population vector represents the population of the \textit{i}th stage.
+    The population vector can be represented by either a column or row vector, and if it is a row vector the transition matrix comes before the population vector in equation (5) so that the multiplication works out.
+    These matrices are constructed such that the product of the \textbf{population vector} and the \textbf{transition matrix to the power of \textit{t}} equals the \textbf{predicted population at time \textit{t}}.
+    For the population of rats, if it is assumed that there are 100 babies, 50 one-year-olds, and 25 two-year-olds, this equation is as follows:
+    \begin{equation}
+        \begin{bmatrix}
+            100 \\
+            50  \\
+            25
+        \end{bmatrix}
+        \begin{bmatrix}
+            0.6 & 2.4 & 0.4 \\
+            0.5 & 0   & 0   \\
+            0   & 0.6 & 0
+        \end{bmatrix}^\textit{t}=
+        \begin{bmatrix}
+            \hat{P_0} \\
+            \hat{P_1} \\
+            \hat{P_2}
+        \end{bmatrix}\label{eq:equation5}
+    \end{equation}
+    \noindent Matrix population models assume the following:
+    \begin{itemize}
+        \item The fecundity and survival rates apply universally to all members of a group or stage
+        \item There is an equal proportion of males and females in the population and within each stage of the population
+        \item Individuals progress through stages as some function of discrete time steps
+        \item Circumstances do not change with time (e.g.\ fecundity rate stays constant, survival rate does not decrease as a result of scarce resources, etc.)
+    \end{itemize}
+
+
+    \subsection{Matrix Operations}
+
+    The reason to use a matrix model over a more simple exponential model or a logistic model is that matrices can be manipulated and analyzed in ways that are unique and often yield important information about a population.
+
+    \subsubsection{Eigensystem Analysis}
+
+    The eigensystem of a matrix is made up of all the eigenvectors and corresponding eigenvalues, and these are meaningful when analyzing matrix population models.
+    The only aspects of this system that are relevant are the dominant eigenvalue (largest positive eigenvalue) and its corresponding eigenvector.
+
+    The dominant eigenvalue $\lambda$ of the transition matrix is equal to the long-term growth rate G of the population where
+    \begin{equation}
+        G = \[ \lim_{t\to\infty} \frac{P(t+1)}{P(t)} \]
+    \end{equation}
+    and $P(t)$ equals the population at time $t$.
+    This number is extremely useful for predicting the long term dynamics of a population.
+    If $\lambda < 1$ it means the population will shrink over time and approach zero.
+    If $\lambda << 1$ then this will happen rapidly.
+    Similarly, if $\lambda > 1$ the population will grow and the higher it is the more quickly this will occur.
+
+    The eigenvector corresponding to this dominant eigenvalue $\lambda$ gives the stable stage distribution of a transition matrix.
+    If this vector is scaled such that the sum of its components equals 1, the $i$th component of the vector is the proportion of the total population that is in the $i$th stage.
+    If the initial population vector is not a scalar multiple of this vector, the distribution will change over time and converge to a multiple of the dominant eigenvector.
+
+    \begin{figure} [!h]
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 1/Graphs/Matrix Model Example Graph}
+            \caption*{Rat population over 10 years}
+        \end{minipage}\hfill
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 1/Graphs/Matrix Model Second Order Example Graph}
+            \caption*{Rat population second order}
+        \end{minipage}
+        \label{fig:ratpop}
+    \end{figure}
+
+    The two graphs in Figure~\ref{fig:ratpop} show the same population of rats over the same time period of 10 years.
+    On the left, the whole population is shown and the exponential nature of matrix models is clear.
+    On the right, the exponential growth as given by $\lambda$ is blocked, so only the second order dynamics can be observed.
+    This shows the population oscillating as the stage distribution converges on the stable distribution given by the dominant eigenvector.
+
+    \subsubsection{Scalar Multiplication}
+
+    \hspace{\parindent}The scale of a transition matrix is linearly correlated with asymptotic growth rate, and independent of stable stage distribution.
+    For example, the rat transition matrix from earlier (4):
+    \begin{equation}
+        \begin{bmatrix}
+            0.6 & 2.4 & 0.4 \\
+            0.5 & 0   & 0   \\
+            0   & 0.6 & 0
+        \end{bmatrix}\label{eq:equation11}
+    \end{equation}
+    has an asymptotic growth rate of about $1.47$ and a stable stage distribution $\begin{bmatrix} 0.68 & 0.23 & 0.09 \end{bmatrix}$.
+    If the matrix is scaled by a factor of $\frac{1}{2}$:
+    \begin{equation}
+        \begin{bmatrix}
+            0.3  & 1.2 & 0.2 \\
+            0.25 & 0   & 0   \\
+            0    & 0.3 & 0
+        \end{bmatrix}\label{eq:equation12}
+    \end{equation}
+    the asymptotic growth rate changes to about $0.74$ ($\frac{1}{2}$ of the growth rate of (11)) and the stable stage distribution remains identical.
+
+    \subsubsection{Matrix Sums of Transition Matrices}
+
+    \hspace{\parindent}Sums of transition matrices have less significance than scalar multiples do.
+    While adding a matrix $A$ to a transition matrix $T$ is a good way to introduce changes to how a population behaves, how $A$ behaves as a transition matrix itself is not useful for predicting how adding it to $T$ will affect $T$ as a transition matrix.
+    The transition matrix $T$ must be known in order to determine the difference in population dynamics between $T$ and $T+A$.
+
+    \subsubsection{Matrix Inverses (Predicting Past Populations)}
+
+    \hspace{\parindent}Due to the nature of matrix population models, they are not super useful for explaining past populations.
+    They can, however, give some insight into the recent past.
+    Because the stage distribution of a population converges to a certain distribution defined by the transition matrix, the second order changes in the population decrease as time goes on.
+
+    This can be seen on the right side in Figure~\ref{fig:ratpop}, the second order dynamics from the rat population.
+    Naturally, if this same model is used to go back in time, the amplitude of the oscillation of the second order dynamics will increase the farther back time goes.
+    This means that the prediction will become less and less accurate, and depending on the transition matrix, negative values for stage populations are possible.
+
+    \subsubsection{Linear Transformations and Rank}\label{subsubsec:linear-transformations-and-rank}
+
+    \hspace{\parindent}Because an $n$ x $n$ transition matrix with nullity $= 1$ transforms a $1$ x $n$ population vector in $\mathbb{R}^n$ to some vector in $\mathbb{R}^{n-1}$, it follows that the stable stage distribution will only be some vector in $\mathbb{R}^{n-1}$ rather than in $\mathbb{R}^n$.
+    This means that at least one stage in the stable distribution will be a linear combination of the other stages.
+    The same is true as nullity increases, and the number of dependent stages in the stable distribution is the same as the nullity of the transition matrix.
+    If a transition matrix has nullity $> 0$, it may be possible to represent the exact same population dynamics with a transition matrix with nullity $= 0$ and dimensions equal to $rank(M) x rank(M)$.
+    This is not obvious, however, and will not be investigated for the purposes of this research.
+
+    \subsection{Defining Sensitivity Analysis}\label{subsec:defining-sensitivity-analysis}
+
+    A sensitivity analysis of a transition matrix determines how much each entry of the transition matrix effects the long-term growth rate.
+    This can be useful for altering a population because it can be determined what the ``most efficient'' way to change $\lambda$ is.
+    A sensitivity analysis looks just like the transition matrix, but each entry represents the derivative of the dominant eigenvalue with respect to that entry in the original matrix.
+    Each entry can be found by first setting it equal to a variable, then expressing the dominant eigenvalue as a function of that variable.
+    After that, the derivative of that function is found and evaluated at the relevant value of the variable (the original entry in the transition matrix).
+    For example, to find the first value of the sensitivity analysis of the rat matrix:
+
+    \begin{equation}
+        \begin{bmatrix}
+            0.6 & 2.4 & 0.4 \\
+            0.5 & 0   & 0   \\
+            0   & 0.6 & 0
+        \end{bmatrix} \:\: \longrightarrow \:\:
+        \begin{bmatrix}
+            x   & 2.4 & 0.4 \\
+            0.5 & 0   & 0   \\
+            0   & 0.6 & 0
+        \end{bmatrix}\label{eq:equation}
+    \end{equation}
+
+    which leads to the very unwieldy function of x:
+
+    \begin{multline}
+        \lambda(x) = \frac{1}{10} \left(\frac{1}{3} 2^{2/3} 5^{1/3} \left(50 x^3 + 9 \sqrt{100 x^3 - 300 x^2 + 540 x - 1359} + 270 x + 81\right)^{1/3}\\
+        - \frac{-100 x^2 - 360}{3 \cdot 2^{2/3} 5^{1/3} \left(50 x^3 + 9 \sqrt{100 x^3 - 300 x^2 + 540 x - 1359} + 270 x + 81\right)^{1/3}} + \frac{10 x}{3}\right))
+    \end{multline}
+
+    and its even uglier derivative:
+
+    \begin{multline}
+        \lambda'(x) = \frac{1}{10}
+        \left(
+        \frac{20{\sqrt[3]{2}} \cdot 5^{2/3} x}{3 {\sqrt[3]{50x^3 + 9\sqrt{100x^3 - 300x^2 + 540x - 1359} + 270 x + 81}}} +\\
+        \frac{(-100x^2 - 360)(150x^2 + \frac{9(300x^2 - 600x + 540)}{2\sqrt{100x^3 - 300x^2 + 540x - 1359}} + 270)}{9 \cdot 2^{2/3} \sqrt[3]{5}(50x^3 + 9\sqrt{100x^3 - 300x^2 + 540x - 1359} + 270x + 81)^{4/3}} +\\
+        \frac{2^{2/3} \sqrt[3]{5} (150x^2 + \frac{9(300x^2 - 600x + 540)}{2 \sqrt{100x^3 - 300x^2 +540x - 1359}} + 270)}{9(50x^3 + 9\sqrt{100x^3 - 300x^2 +540x -1359} + 270x + 81)^{2/3}} + \frac{10}{3}
+        \right))
+    \end{multline}
+
+    which is then evaluated at $x = 0.6$ to finally reveal the sensitivity for the first entry, $0.613556$.
+    This process is then repeated for each entry in the matrix, leading to the sensitivity analysis matrix:
+
+    \begin{equation}
+        \begin{bmatrix}
+            0.613556 & 0.208531 & 0.0850487 \\
+            1.06899 & 0   & 0   \\
+            0   & 0.0566991 & 0
+        \end{bmatrix} \approx
+        \begin{bmatrix}
+            0.61 & 0.21 & 0.09 \\
+            1.07 & 0   & 0   \\
+            0   & 0.06 & 0
+        \end{bmatrix}
+    \end{equation}
+
+    Technically, even the entries that are zero in the transition matrix (Equation~\ref{eq:equation4}) have sensitivities, but those are left as zero because they cannot be changed.
+    Each one of those represents something that cannot happen, such as a rat not aging or aging to three years old.
+    This sensitivity analysis matrix tells that in order to increase the growth rate of the population most efficiently, it is most effective to focus on more baby rats surviving to one year old.
+    It also tells that one-year-old rats surviving to two years old is the least important entry for the population.
+
+    \newpage
+    \begin{center}
+        \section{Analysis}\label{sec:analysis}
+    \end{center}
+
+    \subsection{Eigensystem Analysis}
+
+    Although they are the same species, the two different populations of lizards in this paper have different transition matrices.
+    Even if they lived in the same place, there would likely be differences.
+    The transition matrices are as follows:
+    \begin{equation}
+        $Northern lizard population:\hspace{\parindent}$ A_N =
+        \begin{bmatrix}
+            0 & 0 & 6.62 \\
+            0.33 & 0   & 0   \\
+            0   & 0.25 & 0.47
+        \end{bmatrix}
+    \end{equation}
+    \begin{equation}
+        $Southern lizard population:\hspace{\parindent}$ A_S =
+        \begin{bmatrix}
+            0 & 0 & 10.53 \\
+            0.3 & 0   & 0   \\
+            0   & 0.25 & 0.21
+        \end{bmatrix}
+    \end{equation}
+
+
+    The real eigenvalues and eigenvectors can then be found.
+    There is only one of these for the northern population:
+    \begin{equation}
+        v_N = \begin{bmatrix}
+                       0.676 \\
+                       0.221 \\
+                       0.103
+        \end{bmatrix} \hspace{\parindent}\lambda_N = 1.00777
+    \end{equation}
+    and one for the southern population:
+    \begin{equation}
+        v_S = \begin{bmatrix}
+                  0.717 \\
+                  0.215 \\
+                  0.068
+        \end{bmatrix} \hspace{\parindent}\lambda_S = 0.999903
+    \end{equation}
+
+    Because there is only one real eigenvalue for each, it is clear that it is the dominant eigenvalue.
+    These values say a lot about these populations.
+    The northern population will grow over time while the southern population will shrink.
+    This being said, both growth rates are relatively close to one so the populations are definitely stable in the short term.
+    In order to best understand the significance of these growth rates, a graph is required.
+    For this purpose, a graph over a long time period is most helpful.
+    For Figure~\ref{fig:north_long_term} and Figure~\ref{fig:south_long_term}, an initial population vector of $\begin{bmatrix} 7000 & 2000 & 1000\end{bmatrix}$ is used.
+
+    \begin{figure} [!h]
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Northern Population 150 Years}
+        \end{minipage}\hfill
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Northern Population 1000 Years}
+        \end{minipage}
+        \caption{Northern population over 150 years (left) and 1,000 years (right)}
+        \label{fig:north_long_term}
+    \end{figure}
+
+    \begin{figure} [!h]
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Southern Population 150 Years}
+        \end{minipage}\hfill
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Southern Population 1000 Years}
+        \end{minipage}
+        \caption{Southern population over 150 years (left) and 1,000 years (right)}
+        \label{fig:south_long_term}
+    \end{figure}
+
+    These graphs illustrate the exponential nature of matrix population models.
+    It is also clear that the southern population's growth rate is closer to one, as their population remains much more static.
+    After 150 years, only a slight change in population can be observed.
+
+    The eigenvectors of these transition matrices give the stable stage distribution of the populations.
+    Because its growth rate is so close to one and because the initial population vector does not align as well with its stable distribution, the second order dynamics of the southern population can be seen in the left graph in Figure~\ref{fig:south_long_term}.
+    In order to best observe these dynamics, however, a graph that blocks on exponential growth and has a shorter time interval is ideal.
+    Once again, for Figures~\ref{fig:north_second_order} and~\ref{fig:south_second_order}, an initial population vector of $\begin{bmatrix} 7000 & 2000 & 1000\end{bmatrix}$ is used.
+
+    \begin{figure} [!h]
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Northern Population 10 Years Second Order}
+        \end{minipage}\hfill
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Northern Population 30 Years Second Order}
+        \end{minipage}
+        \caption{Northern population second order dynamics}
+        \label{fig:north_second_order}
+    \end{figure}
+
+    \begin{figure} [!h]
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Southern Population 10 Years Second Order}
+        \end{minipage}\hfill
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Southern Population 30 Years Second Order}
+        \end{minipage}
+        \caption{Southern population second order dynamics}
+        \label{fig:south_second_order}
+    \end{figure}
+
+    Because the initial population vector is not a scalar multiple of either of the two eigenvectors (from equations~\ref{eq:equation15} and~\ref{eq:equation16}), there are oscillations in the population until it is so.
+    It is obvious that these are much larger in the southern population, and this is because the initial population vector is further away from its eigenvector than that of the northern population.
+    Regardless of initial population distribution, however, the distribution in the long run will always converge on the stable stage distribution given by the eigenvector.
+
+    \subsection{Sensitivity Analysis}\label{subsec:sensitivity-analysis}
+
+    The most helpful analysis that can be done to determine how best to treat these populations is sensitivity analysis.
+    Through this, it is clear which stages of the species have the greatest impact on its growth, and whether that impact is through surviving or reproducing more.
+    The sensitivity analysis matrix for each of the two transition matrices are given below:
+
+    \begin{equation}
+        S_N = \begin{bmatrix}
+                  0 & 0 & 0.0392955 \\
+                  0.788293 & 0   & 0   \\
+                  0   & 1.04055 & 0.483736
+        \end{bmatrix} \approx
+        \begin{bmatrix}
+            0 & 0 & 0.04 \\
+            0.79 & 0   & 0   \\
+            0   & 1.04 & 0.48
+        \end{bmatrix}
+    \end{equation}
+
+    \begin{equation}
+        S_S = \begin{bmatrix}
+                  0 & 0 & 0.0290759 \\
+                  1.02056 & 0   & 0   \\
+                  0   & 1.22468 & 0.387603
+        \end{bmatrix} \approx
+        \begin{bmatrix}
+            0 & 0 & 0.03 \\
+            1.02 & 0   & 0   \\
+            0 & 1.22 & 0.39
+        \end{bmatrix}
+    \end{equation}
+
+    From these matrices, it is apparent which stages of the lizards' lives should be focused on in order to most efficiently effect growth rate.
+    For both populations, it is best to alter the one-year-old (juvenile) lizards.
+    This will change the growth rate the most without requiring too much influence.
+
+    \subsection{Treatment}\label{subsec:treatment}
+
+    Texas horned lizards are officially considered ``threatened'' by the Texas government~\cite{noauthor_texas_nodate}.
+    This is because the total population of Texas horned lizards has decreased significantly in the past 50 years.
+    The species has disappeared from about half of the geographical region it once inhabited.
+    Additionally, there is continued demand for the species in both the United States and Mexico, as many people wish to keep them as pets~\cite{pianka_horned_nodate}.
+    Considering these factors, it is best for the species to grow rather than remain stable at this point.
+    Although it is unlikely that the species will make a full recovery, if a few populations flourish then it will certainly help.
+
+    If the abundances of the two populations in this paper were to double in the next 50 years, that would mean that this sample of the species is on its way to a full recovery.
+    In order to accomplish this for both populations, different treatments must be applied to each.
+    Because the current population distributions and abundances are unknown, each population will be assumed to be in a steady state.
+    The stable stage distribution will be scaled such that the sum of the components is 1,000, meaning that the total population for each will be 1,000.
+
+    In order to determine what the growth rate must be in order for the population to double in 50 years, the rule of 72 can be used.
+    Typically used in the field of economics, the rule of 72 states that 72 divided by the percentage increase per year will yield the number of years before an investment doubles in value:
+    \begin{equation}
+        t \approx \frac{72}{r}
+    \end{equation}
+    where $t =$ the number of years until the investment doubles in value and $r =$ the percentage by which the value increases each year.
+    If $t$ is set to 50 and the equation is solved for $r$, the percentage comes out to 1.44.
+    This means that a growth rate of 1.0144 will cause the population to double in 50 years.
+
+    Because the sensitivity analysis showed that altering juvenile survival is the most efficient way to change the growth rate, that is what will be done.
+    That entry can be replaced by a variable, then setting the function of $x$ that gives the dominant eigenvalue equal to 1.0144 will yield the necessary value.
+
+    \begin{equation}
+        A_N = \begin{bmatrix}
+                  0 & 0 & 6.62 \\
+                  0.33 & 0   & 0   \\
+                  0   & 0.25 & 0.47
+        \end{bmatrix} \longrightarrow A_N' =
+        \begin{bmatrix}
+            0 & 0 & 6.62 \\
+            0.33 & 0   & 0   \\
+            0   & x_N & 0.47
+        \end{bmatrix}
+    \end{equation}
+
+    \begin{equation}
+        A_S = \begin{bmatrix}
+                  0 & 0 & 10.53 \\
+                  0.3 & 0   & 0   \\
+                  0   & 0.25 & 0.21
+        \end{bmatrix} \longrightarrow A_S' =
+        \begin{bmatrix}
+            0 & 0 & 10.53 \\
+            0.3 & 0   & 0   \\
+            0   & x_S & 0.21
+        \end{bmatrix}
+    \end{equation}
+
+    \begin{equation}
+        x_N \approx 0.25643 \:\:\:\:\:\: x_S \approx 0.262024
+    \end{equation}
+
+    The northern population's juveniles must have a survival rate of about 25.6\%.
+    That means an increase of about 2.6\%.
+    The southern population's juveniles must have a survival rate of about 26.2\%, meaning an increase of about 4.8\%.
+    In order to implement these changes, the environment must be affected in some way.
+    This way will vary depending on the ecosystem around each.
+
+    The northern population of lizards likely experiences more habitat loss than the southern one, as it is located in Oklahoma city where human population density is relatively high.
+    One way to increase juvenile survival rates for Texas horned lizards is to increase access to food.
+    A lack of native grasses and flowering plants causes a decline in the ant population.
+    Ants are a primary food source for Texas horned lizards, so replenishing these native plants could set the population up for rapid success~\cite{pianka_horned_nodate}.
+
+    The southern lizard population needs to be altered more than the northern one.
+    Habitat loss is likely less of an issue in rural Texas than in Oklahoma City.
+    In rural Texas native plants are more plentiful, and so are agricultural ones.
+    Southern Texas has good farming land, and farmers use pesticides.
+    Pesticides are a big cause for declines in red imported fire ants, a major food source for Texas horned lizards.
+    Implementing strict laws against pesticide use around the southern lizard population could have a significant effect on the juvenile survival rate.
+    If that were not to be enough, cultivating native plants as with the northern population could be effective supplemental treatment~\cite{pianka_horned_nodate}.
+
+
+    \newpage
+    \begin{center}
+        \section{Conclusion}\label{sec:conclusion}
+    \end{center}
+
+    Matrix models are a powerful tool when analyzing how populations will change over time, if there is enough data.
+    For Texas horned lizards, there is substantial data for the specific populations in this paper.
+    Even with all ths data, however, there are certain phenomena that are not and cannot be accounted for by matrix models:
+    \begin{itemize}
+        \item humans may become even more of an issue in the future do to increasing population
+        \item protection laws may be passed that decrease human influence of the lizards
+        \item climate change will likely continue and may influence the lizard population (either positively or negatively)
+        \item introduction of new species to the ecosystem, such as the invasive red imported fire ants, could affect the lizards
+    \end{itemize}
+
+    Because matrix models are exponential, a small variation at the beginning of a population trajectory can cause a big change down the road.
+    Many random events occur in nature that could do just that, making matrix models far from perfect.
+    To visualize this, the population trajectory can be replicated with demographic stochasticity, as shown in Figure~\ref{fig:dem_stoch}.
+
+    \begin{figure} [!h]
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Northern Population 50 Years Stochastic}
+        \end{minipage}\hfill
+        \begin{minipage}{0.5\linewidth}
+            \centering
+            \includegraphics[scale=0.36]{C:/Users/mitch/Documents/School/2023-24/Linear Algebra/Project 2/Graphs/Southern Population 50 Years Stochastic}
+        \end{minipage}
+        \caption{1000 independent replicates with demographic stochasticity}
+        \label{fig:dem_stoch}
+    \end{figure}
+
+    The difference between the lowest and highest instance of the lizard populations in Figure~\ref{fig:dem_stoch} is very significant.
+    With just 1,000 replicates, the population is subject to vary by a factor of two.
+    Matrix models only provide the average outcome given the information available.
+
+    One-off or random events are not accounted for by matrix population models, but population composition is.
+    When compared to traditional exponential models, matrix models are much more useful in the short term because of the second order dynamics that exponential models lack.
+    They are also simple enough that they can be run easily on any modern computer, even for hundreds or thousands of time steps.
+    This makes them a very appealing option for a variety of applications~\cite{shoemaker_lab_2024}.
+
+    In the real world, matrix models are often used to model bacteria populations.
+    Single celled organisms are especially predictable and go through distinct stages of life.
+    On a global scale, such models could be used to combat extinction of endangered animal species, explain unexpected phenomena based on stage distribution, or even interpret botanical populations.
+    When dealing with fragile populations such as endangered species, though, any error could be tragic.
+    In these situations, it may be better to rely on a more robust or adaptable model for analyzing the population~\cite{hendricks_55_2021}.
+
+    \newpage
+    \begin{center}
+        \section{References}\label{sec:references}
+    \end{center}
+
+    \printbibliography[heading=none]
+
+\end{document}
